@@ -86,9 +86,22 @@ func NewHTTPClient(logger *slog.Logger) *HTTPClient {
 		}
 	}
 
+	jar, err := cookiejar.New(nil)
+	if err != nil {
+		// There are no conditions where cookiejar.New returns an error, ever,
+		// as of Go 1.23.  Just in case that changes in the future, we'll handle
+		// it here.  Fatal because we have no idea what the future error
+		// conditions are.
+		fatalInvariant(fmt.Errorf("failed to create cookie jar: %w", err))
+	}
+
+	client := &http.Client{
+		Jar: jar,
+	}
+
 	return &HTTPClient{
 		logger:        logger,
-		client:        http.DefaultClient,
+		client:        client,
 		tryCount:      defaultRetryCount,
 		retryInterval: defaultRetryInterval,
 		delayFunc:     delayFunc,
@@ -129,12 +142,6 @@ func (h *HTTPClient) SetDelayFunc(fn func(int)) {
 // Returns:
 //   - error: Any error encountered while reading or parsing the cookies file
 func (h *HTTPClient) LoadCookies(filename string) error {
-	jar, err := cookiejar.New(nil)
-	if err != nil {
-		return fmt.Errorf("failed to create cookie jar: %w", err)
-	}
-	h.client.Jar = jar
-
 	//#nosec G304: filename is intentionally from user input
 	file, err := os.Open(filename)
 	if err != nil {
