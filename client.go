@@ -39,12 +39,15 @@ const (
 
 	// Number of tab-separated fields in a Netscape/Mozilla cookies.txt file.
 	cookiesTxtFieldCount = 7
+
+	oneWeekDuration = 7 * 24 * time.Hour
 )
 
 var (
 	ErrRegisteredUsersNotFound = errors.New("could not find registered users count")
 	ErrHTTPStatusNotOK         = errors.New("HTTP request failed with non-200 status")
 	ErrHTTPNotFound            = errors.New("HTTP 404 Not Found")
+	ErrExpiredCookie           = errors.New("cookie is expiring, update your cookies.txt file")
 
 	// Regex to extract number of registered users online from FA HTML.
 	registeredUsersRegexp = regexp.MustCompile(`(\d+)\s+registered`)
@@ -152,7 +155,10 @@ func (h *HTTPClient) LoadCookies(filename string) error {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
-		h.parseCookieLine(line)
+		err := h.parseCookieLine(line)
+		if err != nil {
+			return fmt.Errorf("failed to load cookie: %w", err)
+		}
 	}
 
 	err = scanner.Err()
@@ -313,25 +319,41 @@ func (h *HTTPClient) parseRegisteredUsersOnline(htmlContent []byte) (int, error)
 //
 // Parameters:
 //   - line: A single line from a cookies.txt file
-func (h *HTTPClient) parseCookieLine(line string) {
+func (h *HTTPClient) parseCookieLine(line string) error {
 	// Skip comments and empty lines
 	if line == "" || strings.HasPrefix(line, "#") {
-		return
+		return nil
 	}
 
 	// Parse cookie line format: domain	flag	path	secure	expiration	name	value
 	parts := strings.Split(line, "\t")
 	if len(parts) != cookiesTxtFieldCount {
-		return
+		return nil
 	}
 
 	domain := parts[0]
 	// flag := parts[1] // not used
 	path := parts[2]
 	secure := strings.ToUpper(parts[3]) == "TRUE"
-	// expiration := parts[4] // not used, we don't care about expiry
+	expiration := parts[4]
 	name := parts[5]
 	value := parts[6]
+
+	// Abort if a cookie is expired or will expire soon.  We don't want to
+	// continue without being logged in because it will result in silently
+	// missed submissions.  The user should update their cookies.txt file, or
+	// they can re-run without a cookies.txt file if they don't need logged-in
+	// access.  One week is chosen as a reasonable maximum time the program
+	// might be run without user intervention.
+	expireTime, err := strconv.ParseInt(expiration, 10, 64)
+	if err != nil {
+		return fmt.Errorf("invalid expiration time for cookie %s: %w", name, err)
+	}
+	cookieExpire := time.Unix(expireTime, 0)
+	oneWeekFromNow := time.Now().Add(oneWeekDuration)
+	if cookieExpire.Before(oneWeekFromNow) {
+		return fmt.Errorf("%w: %s", ErrExpiredCookie, name)
+	}
 
 	// Create URL for the domain
 	scheme := "http"
@@ -342,7 +364,7 @@ func (h *HTTPClient) parseCookieLine(line string) {
 	cookieURL, err := url.Parse(
 		fmt.Sprintf("%s://%s%s", scheme, domain, path))
 	if err != nil {
-		return
+		return fmt.Errorf("invalid URL for cookie %s: %w", name, err)
 	}
 
 	// Create cookie
@@ -355,4 +377,5 @@ func (h *HTTPClient) parseCookieLine(line string) {
 
 	// Add cookie to jar
 	h.client.Jar.SetCookies(cookieURL, []*http.Cookie{cookie})
+	return nil
 }

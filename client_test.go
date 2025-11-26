@@ -157,8 +157,8 @@ func TestHTTPClient_GetWithDelay(t *testing.T) {
 func TestHTTPClient_LoadCookies(t *testing.T) {
 	t.Run("Load some cookies", func(t *testing.T) {
 		cookiesContent := `# Netscape HTTP Cookie File
-.furaffinity.net	TRUE	/	TRUE	1735689600	test_cookie	test_value
-.furaffinity.net	TRUE	/path	FALSE	1735689600	another_cookie	another_value`
+.furaffinity.net	TRUE	/	TRUE	4070937600	test_cookie	test_value
+.furaffinity.net	TRUE	/path	FALSE	4070937600	another_cookie	another_value`
 
 		tempfile := filepath.Join(t.TempDir(), "cookies.txt")
 		err := os.WriteFile(tempfile, []byte(cookiesContent), 0600)
@@ -191,8 +191,8 @@ func TestHTTPClient_LoadCookies(t *testing.T) {
 		assert.NilError(t, err)
 
 		format := "# Netscape HTTP Cookie File\n" +
-			"%s\tTRUE\t/\tFALSE\t1735689600\ttest_cookie\ttest_value\n" +
-			"%s\tTRUE\t/\tFALSE\t1735689600\tanother_cookie\tanother_value\n"
+			"%s\tTRUE\t/\tFALSE\t4070937600\ttest_cookie\ttest_value\n" +
+			"%s\tTRUE\t/\tFALSE\t4070937600\tanother_cookie\tanother_value\n"
 		cookies := fmt.Sprintf(format, serverURL.Hostname(), serverURL.Hostname())
 
 		tempfile := filepath.Join(t.TempDir(), "cookies.txt")
@@ -215,5 +215,18 @@ func TestHTTPClient_LoadCookies(t *testing.T) {
 		assert.Assert(t, bytes.Contains(respData,
 			[]byte("another_cookie=another_value")),
 			"Response should contain the another_cookie")
+	})
+
+	t.Run("Abort if cookie is expired", func(t *testing.T) {
+		fiveDaysFromNow := time.Now().Add(5 * 24 * time.Hour).Unix()
+		cookiesContent := fmt.Sprintf(`.furaffinity.net	TRUE	/	TRUE	%d	expired_cookie	expired_value`, fiveDaysFromNow)
+
+		tempfile := filepath.Join(t.TempDir(), "cookies.txt")
+		err := os.WriteFile(tempfile, []byte(cookiesContent), 0600)
+		assert.NilError(t, err)
+
+		client := main.NewHTTPClient(NewTestLogger(t))
+		err = client.LoadCookies(tempfile)
+		assert.Error(t, err, "failed to load cookie: cookie is expiring, update your cookies.txt file: expired_cookie")
 	})
 }
