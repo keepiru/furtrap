@@ -165,6 +165,21 @@ func parseURLAndFilenameFromViewPage(pageContent []byte) (string, string, error)
 	// components, which could lead to directory traversal attacks.
 	urlParts := strings.Split(downloadURL, "/")
 	filename := urlParts[len(urlParts)-1]
+
+	// Sanitize filename for Windows compatibility.
+	// FA already sanitizes filenames, but let's just be sure.
+	replacer := strings.NewReplacer(
+		"<", "_",
+		">", "_",
+		":", "_",
+		"\"", "_",
+		"\\", "_",
+		"|", "_",
+		"?", "_",
+		"*", "_",
+	)
+	filename = replacer.Replace(filename)
+
 	return downloadURL, filename, nil
 }
 

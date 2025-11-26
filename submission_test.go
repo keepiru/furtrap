@@ -99,6 +99,35 @@ func TestSubmission_Save(t *testing.T) {
 		assert.Assert(t, errors.Is(err, main.ErrUnexpectedLinkFormat))
 	})
 
+	t.Run("Save sanitizes Windows-illegal characters in filename", func(t *testing.T) {
+		// Test with a filename containing characters illegal on Windows: < > : " / \ | ? *
+		client.SetResponse(
+			"https://www.furaffinity.net/view/99999",
+			[]byte(`<html><body><a href="//d.furaffinity.net/art/test/`+
+				`file<name>with:illegal|chars?.jpg">Download</a></body></html>`),
+			nil,
+		)
+		client.SetResponse(
+			"https://d.furaffinity.net/art/test/file<name>with:illegal|chars?.jpg",
+			[]byte("test image data"),
+			nil,
+		)
+
+		submissionDir := t.TempDir()
+		submission := main.NewSubmission(NewTestLogger(t), client, 99999, submissionDir)
+		err := submission.Save()
+		assert.NilError(t, err)
+
+		// The filename should have illegal characters replaced with underscores
+		sanitizedImageFN := filepath.Join(submissionDir, "file_name_with_illegal_chars_.jpg")
+		_, err = os.Stat(sanitizedImageFN)
+		assert.NilError(t, err, "sanitized image file should exist")
+
+		sanitizedHTMLFN := filepath.Join(submissionDir, "file_name_with_illegal_chars_.jpg.99999.html")
+		_, err = os.Stat(sanitizedHTMLFN)
+		assert.NilError(t, err, "sanitized HTML file should exist")
+	})
+
 	t.Run("Save fails when download file request fails", func(t *testing.T) {
 		client.SetResponse(
 			"https://www.furaffinity.net/view/12345",
