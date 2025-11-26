@@ -71,7 +71,7 @@ func (s *Submission) ID() uint64 {
 // Returns:
 //   - error: Any error encountered during the download or save process, nil on success
 func (s *Submission) Save() error {
-	// Don't overwrite if it's already saved
+	// We don't need to do anything if it's already saved
 	if s.IsSaved() {
 		s.logger.Debug("Submission already saved, skipping", "id", s.id)
 		return nil
@@ -269,6 +269,9 @@ func (s *Submission) saveSubmissionFiles(filename string, fileContent []byte, pa
 	// submission will be retried if we get interrupted.
 	htmlFilename := fmt.Sprintf("%s.%d.html", filename, s.id)
 	htmlPath := filepath.Join(s.submissionDir, htmlFilename)
+
+	// The filename is fixed so that if we are interrupted, it will be
+	// overwritten on the next run.
 	htmlTempfile := htmlPath + ".tmp"
 
 	// Write to a temp file first

@@ -83,7 +83,10 @@ func (s *Scraper) Run() error {
 		artists = append(artists, artistObj)
 	}
 
-	// The main loop.  Get submissions from each artist and save them.
+	// The main loop.  Get submissions from each artist and save them.  This is
+	// deliberately done sequentially because we want to limit how hard we hit
+	// the FA servers.  This is already fast enough that we add delays between
+	// requests.  Concurrency would just make things worse.
 	for _, artist := range artists {
 		submissions, err := artist.Submissions(s.reCrawl, s.skipScraps)
 		if err != nil {

@@ -236,6 +236,9 @@ func (h *HTTPClient) Get(uri string) ([]byte, error) {
 //   - []byte: The response body content
 //   - error: Any error encountered during the request
 func (h *HTTPClient) get(uri string) ([]byte, error) {
+	// This is the only place where we need a context, so we create one with a
+	// timeout here.  The whole program is intentionally designed so nothing
+	// needs to be cleaned up on shutdown.
 	ctx, cancel := context.WithTimeout(context.Background(), httpTimeout)
 	defer cancel()
 

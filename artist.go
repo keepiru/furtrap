@@ -288,6 +288,8 @@ func GetWatchlist(logger *slog.Logger, client Client, username string) ([]string
 		// We can't use GetWithDelay here because watchlist pages don't
 		// contain the standard FurAffinity footer that our client uses
 		// to determine when to delay.  So we just use Get directly.
+		// This is fine because it's only a small number of pages, and
+		// GetWatchlist is only called once at the start of the program.
 		body, err := client.Get(url)
 		if err != nil {
 			logger.Error("getWatchlist: page fetch error", "url", url, "error", err)
