@@ -125,7 +125,9 @@ func TestSubmissions(t *testing.T) {
 
 		fn := filepath.Join(artistDir, "12345.testartist_test-image-4.104.html")
 		//#nosec G304: filename is from test data
-		_, err := os.Create(fn)
+		f, err := os.Create(fn)
+		assert.NilError(t, err)
+		err = f.Close()
 		assert.NilError(t, err)
 
 		artist := main.NewArtist(NewTestLogger(t), client, "testartist", artistDir)

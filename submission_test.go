@@ -7,6 +7,7 @@ import (
 	main "furtrap"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 	"time"
 
@@ -117,23 +118,29 @@ func TestSubmission_Save(t *testing.T) {
 	})
 
 	t.Run("Save fails when target directory creation fails", func(t *testing.T) {
-		// Create a read-only directory
-		readOnlyDir := t.TempDir()
-		//#nosec G302 - dir needs to be executable
-		err := os.Chmod(readOnlyDir, 0500)
+		tempDir := t.TempDir()
+		// Create a file where we want to create a directory
+		// This prevents MkdirAll from succeeding on both Unix and Windows
+		blockingFile := filepath.Join(tempDir, "blocking")
+		err := os.WriteFile(blockingFile, []byte("blocker"), 0600)
 		assert.NilError(t, err)
 
-		artistDir := filepath.Join(readOnlyDir, "testartist")
+		// Try to create a directory at blockingFile/testartist
+		// This should fail because blockingFile is a file, not a directory
+		artistDir := filepath.Join(blockingFile, "testartist")
 		submission := main.NewSubmission(NewTestLogger(t), client, 12345, artistDir)
 		err = submission.Save()
 		assert.ErrorContains(t, err, "failed to create target directory")
 	})
 
 	t.Run("Save fails when file write fails due to permissions", func(t *testing.T) {
+		if runtime.GOOS == "windows" {
+			t.Skip("Not applicable on Windows due to different permission model")
+		}
 		// Create a directory, then make it read-only after creation
 		tempdir := t.TempDir()
 		artistDir := filepath.Join(tempdir, "writetest")
-		err := os.MkdirAll(artistDir, 0500)
+		err := os.MkdirAll(artistDir, 0400)
 		assert.NilError(t, err)
 
 		submission := main.NewSubmission(NewTestLogger(t), client, 101, artistDir)
@@ -276,7 +283,12 @@ func TestWriteAndFsyncFile(t *testing.T) {
 
 		err := main.WriteAndFsyncFile(filePath, []byte("test data"))
 		assert.ErrorContains(t, err, "failed to create file")
-		assert.ErrorContains(t, err, "no such file or directory")
+		// Error message differs between Unix and Windows
+		if runtime.GOOS == "windows" {
+			assert.ErrorContains(t, err, "cannot find the path")
+		} else {
+			assert.ErrorContains(t, err, "no such file or directory")
+		}
 	})
 
 	t.Run("fails when target is a directory", func(t *testing.T) {
