@@ -113,7 +113,7 @@ func TestHTTPClient_Get(t *testing.T) {
 		have, err := client.Get(uaServer.URL)
 		assert.NilError(t, err)
 
-		want := "furtrap/2.0"
+		want := "furtrap/2.0 (+https://github.com/keepiru/furtrap)"
 		assert.Equal(t, string(have), want)
 	})
 }

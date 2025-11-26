@@ -32,7 +32,7 @@ const (
 	defaultRetryInterval = 5 * time.Second
 
 	httpTimeout   = 90 * time.Second
-	httpUserAgent = "furtrap/2.0"
+	httpUserAgent = "furtrap/2.0 (+https://github.com/keepiru/furtrap)"
 
 	// How many regex capture groups registeredUsersRegexp should have.
 	registeredUsersRegexpCaptures = 2
