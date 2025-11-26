@@ -30,6 +30,14 @@ const (
 	minNewUsernamesThreshold = 2
 )
 
+var (
+	// Regex to extract usernames from watchlist page HTML.
+	// Security: This pattern ensures no slashes are included in the username
+	// capture group.  This prevents directory traversal attacks from a
+	// maliciously crafted username.
+	watchlistUserRegex = regexp.MustCompile(`/user/([^/]+)/`)
+)
+
 // Artist represents a FurAffinity artist and provides methods for retrieving
 // their submissions from both gallery and scraps sections.
 type Artist struct {
@@ -264,11 +272,6 @@ func GetWatchlist(logger *slog.Logger, client Client, username string) ([]string
 
 	// We could parse out the 'a' elements and only match against those, but
 	// this is good enough.
-	//
-	// Security: this regex ensures no slashes are included in the username
-	// capture group.  This prevents directory traversal attacks from a
-	// maliciously crafted username.
-	re := regexp.MustCompile(`/user/([^/]+)/`)
 	seen := make(map[string]bool)
 	var usernames []string
 
@@ -291,7 +294,7 @@ func GetWatchlist(logger *slog.Logger, client Client, username string) ([]string
 			return nil, fmt.Errorf("failed to fetch watchlist page: %w", err)
 		}
 
-		matches := re.FindAllSubmatch(body, -1)
+		matches := watchlistUserRegex.FindAllSubmatch(body, -1)
 
 		// Add usernames found on this page, preserving order and avoiding duplicates
 		for _, match := range matches {
