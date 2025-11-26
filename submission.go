@@ -102,9 +102,10 @@ func (s *Submission) Save() error {
 	case err == nil:
 		// continue
 	case errors.Is(err, ErrHTTPNotFound):
-		// Unfortunately this just happens sometimes.  The view page exists but the
-		// download link 404s.  Log and skip.
-		s.logger.Error("File download 404s, skipping submission", "id", s.id, "url", downloadURL)
+		// Sometimes FA loses the file.  The view page exists but the download
+		// link 404s.  Log and skip.  If the file ever reappears, it will be
+		// picked up on a re-crawl.
+		s.logger.Warn("File download 404s, skipping submission", "id", s.id, "url", downloadURL)
 		return nil
 	default:
 		return fmt.Errorf("failed to download file: %w", err)
