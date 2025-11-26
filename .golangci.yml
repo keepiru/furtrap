@@ -1,0 +1,19 @@
+version: "2"
+linters:
+  default: all
+  disable:
+    - depguard               # Dependency import restrictions
+    - wsl                    # Whitespace linter
+    - nlreturn               # New line before return
+    - wsl_v5                 # Whitespace linter v5
+    - varnamelen             # Variable name length
+    - paralleltest           # Parallel test enforcement
+    - exhaustruct            # Struct field initialization
+    - gochecknoglobals       # Global variable check
+    - prealloc               # Preallocation suggestions
+
+  exclusions:
+    rules:
+      - path: '(.+)_test\.go'
+        linters:
+          - funlen

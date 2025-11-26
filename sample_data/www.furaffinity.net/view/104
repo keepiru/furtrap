@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Scrap Submission 104 by artist-with-two-submissions -- Fur Affinity [dot] net</title>
+</head>
+
+<body>
+    <!-- actions bar -->
+    <div class="alt1 actions aligncenter" style="margin-top: 8px;">
+        <b><a href="/fav/104/?key=test">+Add to Favorites</a></b> |
+        <b><a
+                href="//d.furaffinity.net/art/artist-with-two-submissions/4444444444/4444444444.artist-with-two-submissions_scrap-image-2.png">Download</a></b>
+        |
+        <b><a href="/full/104/">Full View</a></b>
+    </div>
+
+    <!-- This file doesn't have the online-stats div.  This simulates the "classic" stylesheet -->
+    <center>
+        97564 <b><span title="Measured in the last 900 seconds"></span>Users online</span></b> &mdash;
+        82956 <strong>guests</strong>, 13944 <strong>registered</strong>
+    </center>
+</body>
+
+</html>

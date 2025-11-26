@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Watchlist</title>
+</head>
+
+<body>
+    <div>
+        <a href="/user/artist-with-two-submissions/">ArtistWithTwoSubmissions</a>
+    </div>
+</body>
+
+</html>

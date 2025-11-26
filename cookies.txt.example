@@ -1,0 +1,7 @@
+# Netscape HTTP Cookie File
+# This is an example cookies.txt file for FurAffinity
+# Format: domain	flag	path	secure	expiration	name	value
+
+# We just need the a and b cookies
+.furaffinity.net	TRUE	/	TRUE	1735689600	b	example_session_cookie_value
+.furaffinity.net	TRUE	/	FALSE	1735689600	a	example_auth_cookie_value

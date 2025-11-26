@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Test Submission 101 by artist-with-two-submissions -- Fur Affinity [dot] net</title>
+</head>
+
+<body>
+    <!-- actions bar -->
+    <div class="alt1 actions aligncenter" style="margin-top: 8px;">
+        <b><a href="/fav/101/?key=test">+Add to Favorites</a></b> |
+        <b><a
+                href="//d.furaffinity.net/art/artist-with-two-submissions/1111111111/1111111111.artist-with-two-submissions_test-image-1.jpg">Download</a></b>
+        |
+        <b><a href="/full/101/">Full View</a></b>
+    </div>
+
+    <!-- this one doesn't have online user data.  This is used to test error handling paths.-->
+</body>
+
+</html>

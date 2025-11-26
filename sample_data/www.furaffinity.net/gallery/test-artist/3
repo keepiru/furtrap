@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Artwork Gallery for Test-Artist -- Fur Affinity [dot] net</title>
+</head>
+
+<body>
+    <!-- Minimal gallery structure for testing - empty gallery page -->
+    <section id="gallery-gallery" class="gallery">
+        <!-- No submissions on this page -->
+    </section>
+
+    <!-- Online stats section needed for registered user count -->
+    <div class="online-stats">
+        97564 <strong><span title="Measured in the last 900 seconds">Users online</span></strong> &mdash;
+        82956 <strong>guests</strong>, 14608 <strong>registered</strong>
+    </div>
+
+    <small>Limit bot activity to periods with less than 10k registered users online.</small>
+</body>
+
+</html>

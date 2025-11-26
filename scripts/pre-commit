@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# Pre-commit hook for Go project
+# This script runs tests and linting before allowing a commit
+
+set -e
+
+echo "🔍 Running pre-commit checks..."
+
+# Change to the project root directory
+cd "$(git rev-parse --show-toplevel)"
+
+# Run Go tests
+echo "🧪 Running go test..."
+if ! go test ./...; then
+    echo "❌ Tests failed! Commit aborted."
+    exit 1
+fi
+
+# Run golangci-lint
+echo "🔧 Running golangci-lint..."
+if ! golangci-lint run; then
+    echo "❌ Linting failed! Commit aborted."
+    exit 1
+fi
+
+echo "✅ All checks passed! Proceeding with commit."

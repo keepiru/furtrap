@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Gallery</title>
+</head>
+
+<body>
+    <figure id="sid-123456">
+        <b>
+            <u>
+                <a href="/view/101"> <img /> </a>
+                <a href="/view/102"> <img /> </a>
+            </u>
+        </b>
+    </figure>
+</body>
+
+</html>
