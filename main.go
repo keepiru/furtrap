@@ -16,6 +16,12 @@ import (
 	"github.com/spf13/pflag"
 )
 
+var (
+	// Build information, set via -ldflags at build time.
+	buildGitCommitHash = "unknown"
+	buildTimestamp     = "unknown"
+)
+
 // Config holds the application configuration parsed from CLI flags.
 type Config struct {
 	Debug      bool     // Enable debug logging
@@ -44,7 +50,9 @@ func main() {
 		}
 	}
 
-	logger.Info("Starting furtrap")
+	logger.Info("Starting furtrap",
+		"commit", buildGitCommitHash,
+		"buildDate", buildTimestamp)
 	logger.Debug("Configuration", "config", fmt.Sprintf("%+v", config))
 
 	scraper := NewScraper(
