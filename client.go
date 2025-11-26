@@ -152,48 +152,7 @@ func (h *HTTPClient) LoadCookies(filename string) error {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
-
-		// Skip comments and empty lines
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue
-		}
-
-		// Parse cookie line format: domain	flag	path	secure	expiration	name	value
-		parts := strings.Split(line, "\t")
-		if len(parts) != cookiesTxtFieldCount {
-			continue
-		}
-
-		domain := parts[0]
-		// flag := parts[1] // not used
-		path := parts[2]
-		secure := strings.ToUpper(parts[3]) == "TRUE"
-		// expiration := parts[4] // not used, we don't care about expiry
-		name := parts[5]
-		value := parts[6]
-
-		// Create URL for the domain
-		scheme := "http"
-		if secure {
-			scheme = "https"
-		}
-
-		cookieURL, err := url.Parse(
-			fmt.Sprintf("%s://%s%s", scheme, domain, path))
-		if err != nil {
-			continue
-		}
-
-		// Create cookie
-		cookie := &http.Cookie{
-			Name:   name,
-			Value:  value,
-			Domain: domain,
-			Path:   path,
-		}
-
-		// Add cookie to jar
-		h.client.Jar.SetCookies(cookieURL, []*http.Cookie{cookie})
+		h.parseCookieLine(line)
 	}
 
 	err = scanner.Err()
@@ -347,4 +306,53 @@ func (h *HTTPClient) parseRegisteredUsersOnline(htmlContent []byte) (int, error)
 	}
 
 	return registeredUsers, nil
+}
+
+// parseCookieLine parses a single line from a cookies.txt file and adds the
+// cookie to the client's cookie jar.
+//
+// Parameters:
+//   - line: A single line from a cookies.txt file
+func (h *HTTPClient) parseCookieLine(line string) {
+	// Skip comments and empty lines
+	if line == "" || strings.HasPrefix(line, "#") {
+		return
+	}
+
+	// Parse cookie line format: domain	flag	path	secure	expiration	name	value
+	parts := strings.Split(line, "\t")
+	if len(parts) != cookiesTxtFieldCount {
+		return
+	}
+
+	domain := parts[0]
+	// flag := parts[1] // not used
+	path := parts[2]
+	secure := strings.ToUpper(parts[3]) == "TRUE"
+	// expiration := parts[4] // not used, we don't care about expiry
+	name := parts[5]
+	value := parts[6]
+
+	// Create URL for the domain
+	scheme := "http"
+	if secure {
+		scheme = "https"
+	}
+
+	cookieURL, err := url.Parse(
+		fmt.Sprintf("%s://%s%s", scheme, domain, path))
+	if err != nil {
+		return
+	}
+
+	// Create cookie
+	cookie := &http.Cookie{
+		Name:   name,
+		Value:  value,
+		Domain: domain,
+		Path:   path,
+	}
+
+	// Add cookie to jar
+	h.client.Jar.SetCookies(cookieURL, []*http.Cookie{cookie})
 }
