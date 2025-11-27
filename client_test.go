@@ -16,7 +16,7 @@ import (
 	"testing"
 	"time"
 
-	"gotest.tools/assert"
+	"gotest.tools/v3/assert"
 )
 
 func SampleDataHandler(w http.ResponseWriter, r *http.Request) {

@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/spf13/pflag"
-	"gotest.tools/assert"
+	"gotest.tools/v3/assert"
 )
 
 func TestParseFlags(t *testing.T) {
