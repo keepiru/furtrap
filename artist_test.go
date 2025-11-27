@@ -5,7 +5,6 @@ package main_test
 import (
 	"fmt"
 	main "furtrap"
-	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -63,7 +62,7 @@ func TestGetWatchlist(t *testing.T) {
 		}
 
 		// Discard logs to avoid clutter
-		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+		logger := slog.New(slog.DiscardHandler)
 
 		got := CapturePanic(t, func() {
 			_, err := main.GetWatchlist(logger, client, "infinite-watcher")
@@ -169,7 +168,7 @@ func TestSubmissions(t *testing.T) {
 		}
 
 		// Discard logs to avoid clutter
-		logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+		logger := slog.New(slog.DiscardHandler)
 		artist := main.NewArtist(logger, client, "infinite-artist", t.TempDir())
 
 		got := CapturePanic(t, func() {

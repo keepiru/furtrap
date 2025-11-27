@@ -95,7 +95,7 @@ func NewHTTPClient(logger *slog.Logger) *HTTPClient {
 	jar, err := cookiejar.New(nil)
 	if err != nil {
 		// There are no conditions where cookiejar.New returns an error, ever,
-		// as of Go 1.23.  Just in case that changes in the future, we'll handle
+		// as of Go 1.24.  Just in case that changes in the future, we'll handle
 		// it here.  Fatal because we have no idea what the future error
 		// conditions are.
 		fatalInvariant(fmt.Errorf("failed to create cookie jar: %w", err))

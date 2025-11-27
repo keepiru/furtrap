@@ -24,7 +24,7 @@ will start making progress late at night (USA time).
 
 ### Prerequisites
 
-- Go 1.23 or later
+- Go 1.24 or later
 
 ### Building from source
 
