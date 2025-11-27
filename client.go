@@ -26,6 +26,8 @@ const (
 	// Rate limiting constants.
 	highUserThreshold = 10000
 	highUserDelayTime = 5 * time.Minute
+	// Even during low traffic, we add a small delay to be kind to the server.
+	defaultDelayTime = 1 * time.Second
 
 	// HTTP client retry constants.
 	defaultRetryCount    = 3
@@ -85,7 +87,7 @@ func NewHTTPClient(logger *slog.Logger) *HTTPClient {
 			logger.Info("High registered user count detected, delaying 5 minutes", "count", registeredUsers)
 			time.Sleep(highUserDelayTime)
 		} else {
-			time.Sleep(1 * time.Second)
+			time.Sleep(defaultDelayTime)
 		}
 	}
 

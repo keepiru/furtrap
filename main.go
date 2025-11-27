@@ -40,7 +40,7 @@ func main() {
 	client := NewHTTPClient(logger)
 	if config.NoThrottle {
 		// Even without load throttling, we still want some delay to avoid hammering the server
-		client.SetDelayFunc(func(int) { time.Sleep(time.Second) })
+		client.SetDelayFunc(func(int) { time.Sleep(defaultDelayTime) })
 	}
 	if config.CookieFile != "" {
 		err := client.LoadCookies(config.CookieFile)
