@@ -75,7 +75,7 @@ func TestHTTPClient_Get(t *testing.T) {
 
 	t.Run("404", func(t *testing.T) {
 		_, err := client.Get(server.URL + "/view/00000")
-		assert.Assert(t, errors.Is(err, main.ErrHTTPNotFound), "Should get ErrHTTPNotFound on 404")
+		assert.ErrorIs(t, err, main.ErrHTTPNotFound, "Should get ErrHTTPNotFound on 404")
 	})
 
 	t.Run("HTTPClient#Get with flaky 502 succeeds after retry", func(t *testing.T) {
@@ -173,7 +173,7 @@ func TestHTTPClient_LoadCookies(t *testing.T) {
 	t.Run("Nonexistent file = error", func(t *testing.T) {
 		client := main.NewHTTPClient(NewTestLogger(t))
 		err := client.LoadCookies("nonexistent.txt")
-		assert.Assert(t, err != nil)
+		assert.ErrorIs(t, err, os.ErrNotExist)
 	})
 
 	t.Run("Verify cookies received with httptest", func(t *testing.T) {

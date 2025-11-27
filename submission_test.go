@@ -252,7 +252,7 @@ func TestSubmission_Save(t *testing.T) {
 
 		// Verify the image file was not created
 		_, err = os.Stat(imagePath)
-		assert.Assert(t, os.IsNotExist(err))
+		assert.ErrorIs(t, err, os.ErrNotExist)
 	})
 
 	t.Run("Save returns without doing anything if submission download 404s", func(t *testing.T) {
