@@ -105,8 +105,6 @@ func (a *Artist) Submissions(reCrawl bool, skipScraps bool) ([]*Submission, erro
 		submissions = append(submissions, scraps...)
 	}
 
-	a.logger.Info("total submissions found", "user", a.username, "count", len(submissions))
-
 	return submissions, nil
 }
 

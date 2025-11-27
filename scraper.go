@@ -3,6 +3,7 @@ package main
 // SPDX-License-Identifier: GPL-3.0-only
 
 import (
+	"fmt"
 	"log/slog"
 	"path/filepath"
 )
@@ -87,11 +88,15 @@ func (s *Scraper) Run() error {
 	// deliberately done sequentially because we want to limit how hard we hit
 	// the FA servers.  This is already fast enough that we add delays between
 	// requests.  Concurrency would just make things worse.
-	for _, artist := range artists {
+	for i, artist := range artists {
 		submissions, err := artist.Submissions(s.reCrawl, s.skipScraps)
 		if err != nil {
 			return err
 		}
+
+		// Display progress messages
+		progress := fmt.Sprintf("%d/%d", i+1, len(artists))
+		s.logger.Info(artist.Username(), "progress", progress, "new", len(submissions))
 
 		for _, submission := range submissions {
 			err := submission.Save()
