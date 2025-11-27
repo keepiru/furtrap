@@ -4,6 +4,7 @@ package main_test
 
 import (
 	"errors"
+	"fmt"
 	main "furtrap"
 	"os"
 	"path/filepath"
@@ -88,15 +89,38 @@ func TestSubmission_Save(t *testing.T) {
 	})
 
 	t.Run("Save fails when download link format is unexpected", func(t *testing.T) {
-		client.SetResponse(
-			"https://www.furaffinity.net/view/12345",
-			[]byte(`<html><body><a href="http://example.com/file.jpg">Download</a></body></html>`),
-			nil,
-		)
+		tests := []struct {
+			uri  string
+			want error
+		}{
+			{"", main.ErrUnexpectedLinkFormat},
+			{"/", main.ErrUnexpectedLinkFormat},
+			{"///", main.ErrInvalidFilename},
+			{"//d.furaffinity.net/art/artist/", main.ErrInvalidFilename},
+			{"//d.furaffinity.net/art/artist/.", main.ErrInvalidFilename},
+			{"//d.furaffinity.net/art/artist/..", main.ErrInvalidFilename},
+			{"http://example.com/file.jpg", main.ErrUnexpectedLinkFormat},
+			{"https://d.furaffinity.net/art/artist/valid.jpg", main.ErrUnexpectedLinkFormat},
+			{"//d.furaffinity.net/art/artist/valid.jpg", nil},
+			{"//example.com/file.jpg", nil},
+		}
 
-		submission := main.NewSubmission(NewTestLogger(t), client, 12345, t.TempDir())
-		err := submission.Save()
-		assert.Assert(t, errors.Is(err, main.ErrUnexpectedLinkFormat))
+		for _, tt := range tests {
+			t.Run(tt.uri, func(t *testing.T) {
+				client.SetResponse(
+					"https://www.furaffinity.net/view/12345",
+					fmt.Appendf([]byte{}, `<html><body><a href="%s">Download</a></body></html>`, tt.uri),
+					nil)
+
+				submission := main.NewSubmission(NewTestLogger(t), client, 12345, t.TempDir())
+				err := submission.Save()
+				if tt.want != nil {
+					assert.ErrorContains(t, err, tt.want.Error(), "expected error for URI: %s", tt.uri)
+				} else {
+					assert.NilError(t, err, "expected success for URI: %s", tt.uri)
+				}
+			})
+		}
 	})
 
 	t.Run("Save sanitizes Windows-illegal characters in filename", func(t *testing.T) {

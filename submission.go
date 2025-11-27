@@ -23,6 +23,7 @@ var (
 	ErrSubmissionImageNotFound = errors.New("failed to find download link in HTML")
 	ErrUnexpectedLinkFormat    = errors.New("unexpected download link format")
 	ErrInvalidFilePath         = errors.New("invalid file path")
+	ErrInvalidFilename         = errors.New("invalid filename extracted from URL")
 )
 
 // Submission represents a single FurAffinity submission (either a main gallery
@@ -165,7 +166,14 @@ func parseURLAndFilenameFromViewPage(pageContent []byte) (string, string, error)
 	// Security: Splitting on "/" ensures we won't accidentally include any path
 	// components, which could lead to directory traversal attacks.
 	urlParts := strings.Split(downloadURL, "/")
+
+	// There will always be several parts because of the "//" at the start, so
+	// just take the last part.
 	filename := urlParts[len(urlParts)-1]
+
+	if filename == "" || filename == "." || filename == ".." {
+		return "", "", fmt.Errorf("%w: %s", ErrInvalidFilename, filename)
+	}
 
 	// Sanitize filename for Windows compatibility.
 	// FA already sanitizes filenames, but let's just be sure.
