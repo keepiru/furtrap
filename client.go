@@ -50,6 +50,7 @@ var (
 	ErrHTTPStatusNotOK         = errors.New("HTTP request failed with non-200 status")
 	ErrHTTPNotFound            = errors.New("HTTP 404 Not Found")
 	ErrExpiredCookie           = errors.New("cookie is expiring, update your cookies.txt file")
+	ErrInvalidCookie           = errors.New("invalid cookie format")
 
 	// Regex to extract number of registered users online from FA HTML.
 	registeredUsersRegexp = regexp.MustCompile(`(\d+)\s+registered`)
@@ -333,7 +334,7 @@ func (h *HTTPClient) parseCookieLine(line string) error {
 	// Parse cookie line format: domain	flag	path	secure	expiration	name	value
 	parts := strings.Split(line, "\t")
 	if len(parts) != cookiesTxtFieldCount {
-		return nil
+		return fmt.Errorf("%w: %v", ErrInvalidCookie, line)
 	}
 
 	domain := parts[0]

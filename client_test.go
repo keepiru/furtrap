@@ -229,4 +229,16 @@ func TestHTTPClient_LoadCookies(t *testing.T) {
 		err = client.LoadCookies(tempfile)
 		assert.Error(t, err, "failed to load cookie: cookie is expiring, update your cookies.txt file: expired_cookie")
 	})
+
+	t.Run("Abort if cookie is malformed", func(t *testing.T) {
+		cookiesContent := `.furaffinity.net	TRUE	/	TRUE	4070937600	malformed_cookie`
+
+		tempfile := filepath.Join(t.TempDir(), "cookies.txt")
+		err := os.WriteFile(tempfile, []byte(cookiesContent), 0600)
+		assert.NilError(t, err)
+
+		client := main.NewHTTPClient(NewTestLogger(t))
+		err = client.LoadCookies(tempfile)
+		assert.ErrorContains(t, err, "failed to load cookie: invalid cookie format")
+	})
 }
